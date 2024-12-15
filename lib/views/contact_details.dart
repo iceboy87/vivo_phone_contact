@@ -38,7 +38,7 @@ class _DetailedViewState extends State<DetailedView> {
           IconButton(
             icon: const Icon(Icons.edit),
             onPressed: () {
-              // Navigate to UpdateContact screen
+              
               Navigator.push(
                 context,
                 MaterialPageRoute(
@@ -75,6 +75,7 @@ class _DetailedViewState extends State<DetailedView> {
                 ),
               ),
             ),
+
             Center(child: Text(widget.name, style: TextStyle(fontSize: 16.sp,fontWeight: FontWeight.bold))),
             SizedBox(height: 7.h),
             Text(
@@ -105,7 +106,7 @@ class _DetailedViewState extends State<DetailedView> {
                         onPressed: () {
                           _controller.callUser(
                             widget.phone,
-                          ); // Pass widget.phone here
+                          ); 
                         },
                       ),
                       IconButton(
