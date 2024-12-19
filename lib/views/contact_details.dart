@@ -116,11 +116,19 @@ class _DetailedViewState extends State<DetailedView> {
                         },
                       ),
                       IconButton(
-                        onPressed: () {
-                          _controller.emailMessage(context, widget.email);
-                        },
-                        icon: const Icon(Icons.email_rounded),
-                      ),
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                EmailComposePage(
+                                toAddress: widget.email,
+                            ),
+                          ),
+                        );
+                      },
+                      icon: const Icon(Icons.email_rounded),
+                    ),
                     ],
                   ),
                 ),
