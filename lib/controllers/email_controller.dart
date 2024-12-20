@@ -27,7 +27,7 @@ class EmailController {
     final smtpServer = gmail(
       fromAddress,
       "exoe cfmw iylu huip", //enter your 2-factor authentication password.
-      // Go to Form address email => security => app passwords => register "Email" => copy password.
+      // Go to From address email => security => app passwords => register "Email" => copy password.
     );
 
     final emailMessage = Message()
