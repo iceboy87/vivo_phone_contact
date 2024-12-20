@@ -1,11 +1,11 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:sizer/sizer.dart';
-import 'package:mailer/mailer.dart';
-import 'package:mailer/smtp_server.dart';
+import '../controllers/email_controller.dart';
 
 class EmailComposePage extends StatefulWidget {
   final String toAddress;
+
   EmailComposePage({required this.toAddress, Key? key}) : super(key: key);
 
   @override
@@ -13,55 +13,51 @@ class EmailComposePage extends StatefulWidget {
 }
 
 class _EmailComposePageState extends State<EmailComposePage> {
-  final _key = GlobalKey<FormState>();
-  final TextEditingController toAddress = TextEditingController();
+  final _formKey = GlobalKey<FormState>();
+  final TextEditingController toAddressController = TextEditingController();
   final TextEditingController subjectController = TextEditingController();
   final TextEditingController messageController = TextEditingController();
+  late final EmailController emailController;
 
-  sendCustomEmail(
-      String fromAddress,
-      String toAddress,
-      String emailBody,
-      String subject,
-      ) async {
-    print("username: $fromAddress");
-    final smtpServer = gmail(
-        fromAddress,// replace your Login EmailId, As String
-        "VIGNESHwaran123@",// replace your Two factor passcode then your auth verification is successful
-    );
-    final emailMessage =
-    Message()
-      ..from = Address(fromAddress)
-      ..recipients.add(toAddress)
-      ..subject = subject
-      ..text = emailBody;
+  bool _isLoading = false;
 
-    try {
-      final sendReport = await send(emailMessage , smtpServer);
-      print('Message sent: $sendReport');
-    } catch (e) {
-      print('Error occurred: $e');
-    }
+  @override
+  void initState() {
+    super.initState();
+    emailController = EmailController(context: context);
+    // toAddressController.text = widget.toAddress;
+  }
+
+  @override
+  void dispose() {
+    // toAddressController.dispose();
+    subjectController.dispose();
+    messageController.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    String fromAddress = FirebaseAuth.instance.currentUser!.email!;
     return Scaffold(
       appBar: AppBar(title: const Text('Compose Email')),
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.all(10.0),
           child: Form(
-            key: _key,
+            key: _formKey,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(children: [Text("From:"), Text(fromAddress)]),
+                Row(
+                  children: [
+                    const Text("From: "),
+                    Text(FirebaseAuth.instance.currentUser?.email ?? 'Unknown'),
+                  ],
+                ),
                 SizedBox(height: 0.5.h),
-                Text("To:"),
+                const Text("To:"),
                 TextField(
-                  controller: toAddress,
+                  controller: toAddressController,
                   decoration: const InputDecoration(labelText: 'Enter Email'),
                 ),
                 SizedBox(height: 1.h),
@@ -83,20 +79,26 @@ class _EmailComposePageState extends State<EmailComposePage> {
                 ),
                 SizedBox(height: 1.h),
                 Center(
-                  child: ElevatedButton(
-                    onPressed: () {
-                      _key.currentState!.save();
-                      sendCustomEmail(
-                        fromAddress,
-                        toAddress.text,
-                        messageController.text,
-                        subjectController.text,
-                      );
-                      print("sendCustomEmail()");
-                      // Navigator.pop(context); // Optional, if you want to close the page after sending
-                    },
-                    child: const Text('Send'),
-                  ),
+                  child:
+                      _isLoading
+                          ? const CircularProgressIndicator()
+                          : ElevatedButton(
+                            onPressed: () {
+                              if (_formKey.currentState!.validate()) {
+                                emailController.sendCustomEmail(
+                                  toAddress: toAddressController.text,
+                                  subject: subjectController.text,
+                                  emailBody: messageController.text,
+                                  onLoading: (isLoading) {
+                                    setState(() {
+                                      _isLoading = isLoading;
+                                    });
+                                  },
+                                );
+                              }
+                            },
+                            child: const Text('Send'),
+                          ),
                 ),
               ],
             ),
